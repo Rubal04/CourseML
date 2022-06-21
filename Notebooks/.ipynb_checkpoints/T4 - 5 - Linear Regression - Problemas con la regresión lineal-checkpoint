@@ -1,0 +1,1984 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "51ce4cb3",
+   "metadata": {},
+   "source": [
+    "# El tratamiento de las variables categóricas"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "bb76a059",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "from sklearn.linear_model import LinearRegression"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "36668f1f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df = pd.read_csv(\"/Users/Gullermo R/OneDrive/Documentos/GitHub/python-ml-course/datasets/ecom-expense/Ecom Expense.csv\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "f67e8715",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Transaction ID</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>Items</th>\n",
+       "      <th>Monthly Income</th>\n",
+       "      <th>Transaction Time</th>\n",
+       "      <th>Record</th>\n",
+       "      <th>Gender</th>\n",
+       "      <th>City Tier</th>\n",
+       "      <th>Total Spend</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>TXN001</td>\n",
+       "      <td>42</td>\n",
+       "      <td>10</td>\n",
+       "      <td>7313</td>\n",
+       "      <td>627.668127</td>\n",
+       "      <td>5</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 1</td>\n",
+       "      <td>4198.385084</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>TXN002</td>\n",
+       "      <td>24</td>\n",
+       "      <td>8</td>\n",
+       "      <td>17747</td>\n",
+       "      <td>126.904567</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 2</td>\n",
+       "      <td>4134.976648</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>TXN003</td>\n",
+       "      <td>47</td>\n",
+       "      <td>11</td>\n",
+       "      <td>22845</td>\n",
+       "      <td>873.469701</td>\n",
+       "      <td>2</td>\n",
+       "      <td>Male</td>\n",
+       "      <td>Tier 2</td>\n",
+       "      <td>5166.614455</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>TXN004</td>\n",
+       "      <td>50</td>\n",
+       "      <td>11</td>\n",
+       "      <td>18552</td>\n",
+       "      <td>380.219428</td>\n",
+       "      <td>7</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 1</td>\n",
+       "      <td>7784.447676</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>TXN005</td>\n",
+       "      <td>60</td>\n",
+       "      <td>2</td>\n",
+       "      <td>14439</td>\n",
+       "      <td>403.374223</td>\n",
+       "      <td>2</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 2</td>\n",
+       "      <td>3254.160485</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  Transaction ID  Age    Items   Monthly Income  Transaction Time  Record  \\\n",
+       "0         TXN001    42       10            7313        627.668127       5   \n",
+       "1         TXN002    24        8           17747        126.904567       3   \n",
+       "2         TXN003    47       11           22845        873.469701       2   \n",
+       "3         TXN004    50       11           18552        380.219428       7   \n",
+       "4         TXN005    60        2           14439        403.374223       2   \n",
+       "\n",
+       "   Gender City Tier  Total Spend  \n",
+       "0  Female    Tier 1  4198.385084  \n",
+       "1  Female    Tier 2  4134.976648  \n",
+       "2    Male    Tier 2  5166.614455  \n",
+       "3  Female    Tier 1  7784.447676  \n",
+       "4  Female    Tier 2  3254.160485  "
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "3d55359b",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dummy_gender = pd.get_dummies(df[\"Gender\"], prefix = \"Gender\")\n",
+    "dummy_city_tier = pd.get_dummies(df[\"City Tier\"], prefix = \"City\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "d6ae0416",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Gender_Female</th>\n",
+       "      <th>Gender_Male</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   Gender_Female  Gender_Male\n",
+       "0              1            0\n",
+       "1              1            0\n",
+       "2              0            1\n",
+       "3              1            0\n",
+       "4              1            0"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "dummy_gender.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "5dc3c8ae",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>City_Tier 1</th>\n",
+       "      <th>City_Tier 2</th>\n",
+       "      <th>City_Tier 3</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   City_Tier 1  City_Tier 2  City_Tier 3\n",
+       "0            1            0            0\n",
+       "1            0            1            0\n",
+       "2            0            1            0\n",
+       "3            1            0            0\n",
+       "4            0            1            0"
+      ]
+     },
+     "execution_count": 8,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "dummy_city_tier.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "e8c711f3",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "['Transaction ID',\n",
+       " 'Age ',\n",
+       " ' Items ',\n",
+       " 'Monthly Income',\n",
+       " 'Transaction Time',\n",
+       " 'Record',\n",
+       " 'Gender',\n",
+       " 'City Tier',\n",
+       " 'Total Spend']"
+      ]
+     },
+     "execution_count": 9,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "column_names = df.columns.values.tolist()\n",
+    "column_names"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "716db4a9",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Transaction ID</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>Items</th>\n",
+       "      <th>Monthly Income</th>\n",
+       "      <th>Transaction Time</th>\n",
+       "      <th>Record</th>\n",
+       "      <th>Gender</th>\n",
+       "      <th>City Tier</th>\n",
+       "      <th>Total Spend</th>\n",
+       "      <th>Gender_Female</th>\n",
+       "      <th>Gender_Male</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>TXN001</td>\n",
+       "      <td>42</td>\n",
+       "      <td>10</td>\n",
+       "      <td>7313</td>\n",
+       "      <td>627.668127</td>\n",
+       "      <td>5</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 1</td>\n",
+       "      <td>4198.385084</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>TXN002</td>\n",
+       "      <td>24</td>\n",
+       "      <td>8</td>\n",
+       "      <td>17747</td>\n",
+       "      <td>126.904567</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 2</td>\n",
+       "      <td>4134.976648</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>TXN003</td>\n",
+       "      <td>47</td>\n",
+       "      <td>11</td>\n",
+       "      <td>22845</td>\n",
+       "      <td>873.469701</td>\n",
+       "      <td>2</td>\n",
+       "      <td>Male</td>\n",
+       "      <td>Tier 2</td>\n",
+       "      <td>5166.614455</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>TXN004</td>\n",
+       "      <td>50</td>\n",
+       "      <td>11</td>\n",
+       "      <td>18552</td>\n",
+       "      <td>380.219428</td>\n",
+       "      <td>7</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 1</td>\n",
+       "      <td>7784.447676</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>TXN005</td>\n",
+       "      <td>60</td>\n",
+       "      <td>2</td>\n",
+       "      <td>14439</td>\n",
+       "      <td>403.374223</td>\n",
+       "      <td>2</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 2</td>\n",
+       "      <td>3254.160485</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  Transaction ID  Age    Items   Monthly Income  Transaction Time  Record  \\\n",
+       "0         TXN001    42       10            7313        627.668127       5   \n",
+       "1         TXN002    24        8           17747        126.904567       3   \n",
+       "2         TXN003    47       11           22845        873.469701       2   \n",
+       "3         TXN004    50       11           18552        380.219428       7   \n",
+       "4         TXN005    60        2           14439        403.374223       2   \n",
+       "\n",
+       "   Gender City Tier  Total Spend  Gender_Female  Gender_Male  \n",
+       "0  Female    Tier 1  4198.385084              1            0  \n",
+       "1  Female    Tier 2  4134.976648              1            0  \n",
+       "2    Male    Tier 2  5166.614455              0            1  \n",
+       "3  Female    Tier 1  7784.447676              1            0  \n",
+       "4  Female    Tier 2  3254.160485              1            0  "
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df_new = df[column_names].join(dummy_gender)\n",
+    "column_names = df_new.columns.values.tolist()\n",
+    "df_new.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "f050a876",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Transaction ID</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>Items</th>\n",
+       "      <th>Monthly Income</th>\n",
+       "      <th>Transaction Time</th>\n",
+       "      <th>Record</th>\n",
+       "      <th>Gender</th>\n",
+       "      <th>City Tier</th>\n",
+       "      <th>Total Spend</th>\n",
+       "      <th>Gender_Female</th>\n",
+       "      <th>Gender_Male</th>\n",
+       "      <th>City_Tier 1</th>\n",
+       "      <th>City_Tier 2</th>\n",
+       "      <th>City_Tier 3</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>TXN001</td>\n",
+       "      <td>42</td>\n",
+       "      <td>10</td>\n",
+       "      <td>7313</td>\n",
+       "      <td>627.668127</td>\n",
+       "      <td>5</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 1</td>\n",
+       "      <td>4198.385084</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>TXN002</td>\n",
+       "      <td>24</td>\n",
+       "      <td>8</td>\n",
+       "      <td>17747</td>\n",
+       "      <td>126.904567</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 2</td>\n",
+       "      <td>4134.976648</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>TXN003</td>\n",
+       "      <td>47</td>\n",
+       "      <td>11</td>\n",
+       "      <td>22845</td>\n",
+       "      <td>873.469701</td>\n",
+       "      <td>2</td>\n",
+       "      <td>Male</td>\n",
+       "      <td>Tier 2</td>\n",
+       "      <td>5166.614455</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>TXN004</td>\n",
+       "      <td>50</td>\n",
+       "      <td>11</td>\n",
+       "      <td>18552</td>\n",
+       "      <td>380.219428</td>\n",
+       "      <td>7</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 1</td>\n",
+       "      <td>7784.447676</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>TXN005</td>\n",
+       "      <td>60</td>\n",
+       "      <td>2</td>\n",
+       "      <td>14439</td>\n",
+       "      <td>403.374223</td>\n",
+       "      <td>2</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 2</td>\n",
+       "      <td>3254.160485</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  Transaction ID  Age    Items   Monthly Income  Transaction Time  Record  \\\n",
+       "0         TXN001    42       10            7313        627.668127       5   \n",
+       "1         TXN002    24        8           17747        126.904567       3   \n",
+       "2         TXN003    47       11           22845        873.469701       2   \n",
+       "3         TXN004    50       11           18552        380.219428       7   \n",
+       "4         TXN005    60        2           14439        403.374223       2   \n",
+       "\n",
+       "   Gender City Tier  Total Spend  Gender_Female  Gender_Male  City_Tier 1  \\\n",
+       "0  Female    Tier 1  4198.385084              1            0            1   \n",
+       "1  Female    Tier 2  4134.976648              1            0            0   \n",
+       "2    Male    Tier 2  5166.614455              0            1            0   \n",
+       "3  Female    Tier 1  7784.447676              1            0            1   \n",
+       "4  Female    Tier 2  3254.160485              1            0            0   \n",
+       "\n",
+       "   City_Tier 2  City_Tier 3  \n",
+       "0            0            0  \n",
+       "1            1            0  \n",
+       "2            1            0  \n",
+       "3            0            0  \n",
+       "4            1            0  "
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df_new = df_new[column_names].join(dummy_city_tier)\n",
+    "df_new.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "7df8483e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "feature_cols = [\"Monthly Income\", \"Transaction Time\", \n",
+    "                \"Gender_Female\", \"Gender_Male\", \n",
+    "                \"City_Tier 1\", \"City_Tier 2\", \"City_Tier 3\",\n",
+    "                \"Record\"]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "5f3bdc62",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = df_new[feature_cols]\n",
+    "Y = df_new[\"Total Spend\"]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "c0ecff4b",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "LinearRegression()"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "lm = LinearRegression()\n",
+    "lm.fit(X,Y)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "id": "4cb7ff0a",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "-79.41713030137362\n",
+      "[ 1.47538980e-01  1.54946125e-01 -1.31025013e+02  1.31025013e+02\n",
+      "  7.67643260e+01  5.51389743e+01 -1.31903300e+02  7.72233446e+02]\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(lm.intercept_)\n",
+    "print(lm.coef_)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "id": "ed19a137",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[('Monthly Income', 0.14753898049205738),\n",
+       " ('Transaction Time', 0.1549461254958959),\n",
+       " ('Gender_Female', -131.02501325554627),\n",
+       " ('Gender_Male', 131.0250132555462),\n",
+       " ('City_Tier 1', 76.7643260104954),\n",
+       " ('City_Tier 2', 55.13897430923245),\n",
+       " ('City_Tier 3', -131.90330031972775),\n",
+       " ('Record', 772.2334457445648)]"
+      ]
+     },
+     "execution_count": 16,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "list(zip(feature_cols, lm.coef_))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "id": "4ace34b7",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.9179923586131016"
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "lm.score(X,Y)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fbd8ff8f",
+   "metadata": {},
+   "source": [
+    "### El modelo puede ser escrito como:\n",
+    "\n",
+    "* Total_Spend = -79.41713030137362 + 'Monthly Income' 0.14753898049205738 + 'Transaction Time' 0.15494612549589545+'Gender_Female' -131.02501325554567 + 'Gender_Male' 131.0250132555456+'City_Tier 1' 76.76432601049527 + 'City_Tier 2' 55.138974309232474 + 'City_Tier 3' -131.9033003197278+'Record' 772.2334457445648\n",
+    "    *Si es hombre y vive en CT1: Total_Spend = 128.37220896466724 + 'Monthly Income' 0.14753898049205738 + 'Transaction Time' 0.15494612549589545+'Record'* 772.2334457445648\n",
+    "    * Si es hombre y vive en CT2: Total_Spend = 106.74685726340445 + 'Monthly Income' 0.14753898049205738 + 'Transaction Time' 0.15494612549589545 +'Record'* 772.2334457445648\n",
+    "    * Si es hombre y vive en CT3: Total_Spend = -80.29541736555583 + 'Monthly Income' 0.14753898049205738 + 'Transaction Time' 0.15494612549589545+'Record'* 772.2334457445648\n",
+    "    * Si es mujer y vive en CT1: Total_Spend = -79.41713030137362 + 'Monthly Income' 0.14753898049205738 + 'Transaction Time' 0.15494612549589545 - 131.0250132555456+ 76.76432601049527 +'Record'* 772.2334457445648\n",
+    "    * Si es mujer y vive en CT2: Total_Spend = -79.41713030137362 + 'Monthly Income' 0.14753898049205738 + 'Transaction Time' 0.15494612549589545 - 131.0250132555456+ 55.138974309232474 +'Record'* 772.2334457445648\n",
+    "    * Si es mujer y vive en CT3: Total_Spend = -79.41713030137362 + 'Monthly Income' 0.14753898049205738 + 'Transaction Time' 0.15494612549589545 - 131.0250132555456-131.9033003197278 +'Record'* 772.2334457445648"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "id": "1f23d781",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "-80.29541736555583"
+      ]
+     },
+     "execution_count": 22,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    " -79.41713030137362 + 131.0250132555456-131.9033003197278"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "id": "eccb9f45",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df_new[\"prediction\"] = -79.41713030137362 + df_new['Monthly Income']*0.14753898049205738 + df_new['Transaction Time']* 0.15494612549589545+ df_new['Gender_Female']* -131.02501325554567 + df_new['Gender_Male']* 131.0250132555456+ df_new['City_Tier 1']* 76.76432601049527 + df_new['City_Tier 2']* 55.138974309232474 + df_new['City_Tier 3']* -131.9033003197278+ df_new['Record']* 772.2334457445648 "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "id": "e09ef3db",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Transaction ID</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>Items</th>\n",
+       "      <th>Monthly Income</th>\n",
+       "      <th>Transaction Time</th>\n",
+       "      <th>Record</th>\n",
+       "      <th>Gender</th>\n",
+       "      <th>City Tier</th>\n",
+       "      <th>Total Spend</th>\n",
+       "      <th>Gender_Female</th>\n",
+       "      <th>Gender_Male</th>\n",
+       "      <th>City_Tier 1</th>\n",
+       "      <th>City_Tier 2</th>\n",
+       "      <th>City_Tier 3</th>\n",
+       "      <th>prediction</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>TXN001</td>\n",
+       "      <td>42</td>\n",
+       "      <td>10</td>\n",
+       "      <td>7313</td>\n",
+       "      <td>627.668127</td>\n",
+       "      <td>5</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 1</td>\n",
+       "      <td>4198.385084</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>4903.696720</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>TXN002</td>\n",
+       "      <td>24</td>\n",
+       "      <td>8</td>\n",
+       "      <td>17747</td>\n",
+       "      <td>126.904567</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 2</td>\n",
+       "      <td>4134.976648</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>4799.434826</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>TXN003</td>\n",
+       "      <td>47</td>\n",
+       "      <td>11</td>\n",
+       "      <td>22845</td>\n",
+       "      <td>873.469701</td>\n",
+       "      <td>2</td>\n",
+       "      <td>Male</td>\n",
+       "      <td>Tier 2</td>\n",
+       "      <td>5166.614455</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>5157.082504</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>TXN004</td>\n",
+       "      <td>50</td>\n",
+       "      <td>11</td>\n",
+       "      <td>18552</td>\n",
+       "      <td>380.219428</td>\n",
+       "      <td>7</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 1</td>\n",
+       "      <td>7784.447676</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>8068.012996</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>TXN005</td>\n",
+       "      <td>60</td>\n",
+       "      <td>2</td>\n",
+       "      <td>14439</td>\n",
+       "      <td>403.374223</td>\n",
+       "      <td>2</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 2</td>\n",
+       "      <td>3254.160485</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "      <td>3581.980335</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  Transaction ID  Age    Items   Monthly Income  Transaction Time  Record  \\\n",
+       "0         TXN001    42       10            7313        627.668127       5   \n",
+       "1         TXN002    24        8           17747        126.904567       3   \n",
+       "2         TXN003    47       11           22845        873.469701       2   \n",
+       "3         TXN004    50       11           18552        380.219428       7   \n",
+       "4         TXN005    60        2           14439        403.374223       2   \n",
+       "\n",
+       "   Gender City Tier  Total Spend  Gender_Female  Gender_Male  City_Tier 1  \\\n",
+       "0  Female    Tier 1  4198.385084              1            0            1   \n",
+       "1  Female    Tier 2  4134.976648              1            0            0   \n",
+       "2    Male    Tier 2  5166.614455              0            1            0   \n",
+       "3  Female    Tier 1  7784.447676              1            0            1   \n",
+       "4  Female    Tier 2  3254.160485              1            0            0   \n",
+       "\n",
+       "   City_Tier 2  City_Tier 3   prediction  \n",
+       "0            0            0  4903.696720  \n",
+       "1            1            0  4799.434826  \n",
+       "2            1            0  5157.082504  \n",
+       "3            0            0  8068.012996  \n",
+       "4            1            0  3581.980335  "
+      ]
+     },
+     "execution_count": 24,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df_new.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "id": "b01bef47",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "SSD = np.sum((df_new[\"prediction\"] - df_new[\"Total Spend\"])**2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "id": "43eb8e64",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "1517733985.340816"
+      ]
+     },
+     "execution_count": 26,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "SSD"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "id": "415643f1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "RSE = np.sqrt(SSD/(len(df_new)-len(feature_cols)-1))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "id": "86384337",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "803.1318809818165"
+      ]
+     },
+     "execution_count": 28,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "RSE"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "id": "94cc5c77",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "sales_mean=np.mean(df_new[\"Total Spend\"])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "id": "31df9f9f",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "6163.176415976714"
+      ]
+     },
+     "execution_count": 30,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "sales_mean"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "id": "7a2c304f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "error = RSE/sales_mean"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "id": "c8919edf",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "13.031135680294161"
+      ]
+     },
+     "execution_count": 32,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "error*100"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "09fddf22",
+   "metadata": {},
+   "source": [
+    "# Eliminar variables dummy redundantes"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "id": "5d5437d0",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Gender_Male</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   Gender_Male\n",
+       "0            0\n",
+       "1            0\n",
+       "2            1\n",
+       "3            0\n",
+       "4            0"
+      ]
+     },
+     "execution_count": 33,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "dummy_gender = pd.get_dummies(df[\"Gender\"], prefix=\"Gender\").iloc[:,1:]\n",
+    "dummy_gender.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "id": "c10e41f1",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>City_Tier 2</th>\n",
+       "      <th>City_Tier 3</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   City_Tier 2  City_Tier 3\n",
+       "0            0            0\n",
+       "1            1            0\n",
+       "2            1            0\n",
+       "3            0            0\n",
+       "4            1            0"
+      ]
+     },
+     "execution_count": 34,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "dummy_city_tier = pd.get_dummies(df[\"City Tier\"], prefix=\"City\").iloc[:,1:]\n",
+    "dummy_city_tier.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "id": "65605c7f",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Transaction ID</th>\n",
+       "      <th>Age</th>\n",
+       "      <th>Items</th>\n",
+       "      <th>Monthly Income</th>\n",
+       "      <th>Transaction Time</th>\n",
+       "      <th>Record</th>\n",
+       "      <th>Gender</th>\n",
+       "      <th>City Tier</th>\n",
+       "      <th>Total Spend</th>\n",
+       "      <th>Gender_Male</th>\n",
+       "      <th>City_Tier 2</th>\n",
+       "      <th>City_Tier 3</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>TXN001</td>\n",
+       "      <td>42</td>\n",
+       "      <td>10</td>\n",
+       "      <td>7313</td>\n",
+       "      <td>627.668127</td>\n",
+       "      <td>5</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 1</td>\n",
+       "      <td>4198.385084</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>TXN002</td>\n",
+       "      <td>24</td>\n",
+       "      <td>8</td>\n",
+       "      <td>17747</td>\n",
+       "      <td>126.904567</td>\n",
+       "      <td>3</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 2</td>\n",
+       "      <td>4134.976648</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>TXN003</td>\n",
+       "      <td>47</td>\n",
+       "      <td>11</td>\n",
+       "      <td>22845</td>\n",
+       "      <td>873.469701</td>\n",
+       "      <td>2</td>\n",
+       "      <td>Male</td>\n",
+       "      <td>Tier 2</td>\n",
+       "      <td>5166.614455</td>\n",
+       "      <td>1</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>TXN004</td>\n",
+       "      <td>50</td>\n",
+       "      <td>11</td>\n",
+       "      <td>18552</td>\n",
+       "      <td>380.219428</td>\n",
+       "      <td>7</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 1</td>\n",
+       "      <td>7784.447676</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>TXN005</td>\n",
+       "      <td>60</td>\n",
+       "      <td>2</td>\n",
+       "      <td>14439</td>\n",
+       "      <td>403.374223</td>\n",
+       "      <td>2</td>\n",
+       "      <td>Female</td>\n",
+       "      <td>Tier 2</td>\n",
+       "      <td>3254.160485</td>\n",
+       "      <td>0</td>\n",
+       "      <td>1</td>\n",
+       "      <td>0</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  Transaction ID  Age    Items   Monthly Income  Transaction Time  Record  \\\n",
+       "0         TXN001    42       10            7313        627.668127       5   \n",
+       "1         TXN002    24        8           17747        126.904567       3   \n",
+       "2         TXN003    47       11           22845        873.469701       2   \n",
+       "3         TXN004    50       11           18552        380.219428       7   \n",
+       "4         TXN005    60        2           14439        403.374223       2   \n",
+       "\n",
+       "   Gender City Tier  Total Spend  Gender_Male  City_Tier 2  City_Tier 3  \n",
+       "0  Female    Tier 1  4198.385084            0            0            0  \n",
+       "1  Female    Tier 2  4134.976648            0            1            0  \n",
+       "2    Male    Tier 2  5166.614455            1            1            0  \n",
+       "3  Female    Tier 1  7784.447676            0            0            0  \n",
+       "4  Female    Tier 2  3254.160485            0            1            0  "
+      ]
+     },
+     "execution_count": 35,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "column_names = df.columns.values.tolist()\n",
+    "df_new = df[column_names].join(dummy_gender)\n",
+    "column_names = df_new.columns.values.tolist()\n",
+    "df_new = df_new[column_names].join(dummy_city_tier)\n",
+    "df_new.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "id": "b835f5fb",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "LinearRegression()"
+      ]
+     },
+     "execution_count": 36,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "feature_cols = [\"Monthly Income\", \"Transaction Time\", \"Gender_Male\", \"City_Tier 2\", \"City_Tier 3\", \"Record\"]\n",
+    "X = df_new[feature_cols]\n",
+    "Y = df_new[\"Total Spend\"]\n",
+    "lm = LinearRegression()\n",
+    "lm.fit(X,Y)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 37,
+   "id": "44483090",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "-133.67781754642056\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(lm.intercept_)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 38,
+   "id": "59c2064b",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "[('Monthly Income', 0.14753898049205744),\n",
+       " ('Transaction Time', 0.15494612549589887),\n",
+       " ('Gender_Male', 262.0500265110947),\n",
+       " ('City_Tier 2', -21.62535170126259),\n",
+       " ('City_Tier 3', -208.66762633022293),\n",
+       " ('Record', 772.2334457445634)]"
+      ]
+     },
+     "execution_count": 38,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "list(zip(feature_cols, lm.coef_))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 39,
+   "id": "a9030422",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.9179923586131016"
+      ]
+     },
+     "execution_count": 39,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "lm.score(X,Y)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f4a6f57d",
+   "metadata": {},
+   "source": [
+    "### Coeficientes con todas las variables en el modelo\n",
+    "\n",
+    "    * ('Monthly Income', 0.14753898049205738),\n",
+    "    * ('Transaction Time', 0.15494612549589545),\n",
+    "    * ('Gender_Female', -131.02501325554567),\n",
+    "    * ('Gender_Male', 131.0250132555456),\n",
+    "    * ('City_Tier 1', 76.76432601049527),\n",
+    "    * ('City_Tier 2', 55.138974309232474),\n",
+    "    * ('City_Tier 3', -131.9033003197278),\n",
+    "    * ('Record', 772.2334457445648)\n",
+    "\n",
+    "    Coeficientes tras enmascarar las variables dummy pertinentes\n",
+    "\n",
+    "    * 'Monthly Income', 0.14753898049205744),\n",
+    "    * ('Transaction Time', 0.15494612549589631),\n",
+    "    * ('Gender_Male', 262.05002651109595),\n",
+    "    * ('City_Tier 2', -21.62535170126296),\n",
+    "    * ('City_Tier 3', -208.66762633022324),\n",
+    "    * ('Record', 772.2334457445635)]\n",
+    "    Los cambios se reflejan en\n",
+    "\n",
+    "        * Gender_Male:\n",
+    "        * antes -> 131.02,\n",
+    "        * después -> 262.05 = ( 131.02 - (-131.02))\n",
+    "    * Gender_Female:\n",
+    "        * antes -> -131.02,\n",
+    "        * después -> 0\n",
+    "    * CT1:\n",
+    "        * antes -> 76.76,\n",
+    "        * después -> 0\n",
+    "    * CT2:\n",
+    "        * antes -> 55.13,\n",
+    "        * después -> -21.62 = (55.13 - 76.76)\n",
+    "    * CT3:\n",
+    "        * antes -> -131.90,\n",
+    "        * después -> -208.66 = (-131.90 - 76.76)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "13ffb37f",
+   "metadata": {},
+   "source": [
+    "# Transformación de variables para conseguir una relación no lineal"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 59,
+   "id": "2a86f2dc",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "from sklearn.linear_model import LinearRegression"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 60,
+   "id": "ed0aaf8f",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>mpg</th>\n",
+       "      <th>cylinders</th>\n",
+       "      <th>displacement</th>\n",
+       "      <th>horsepower</th>\n",
+       "      <th>weight</th>\n",
+       "      <th>acceleration</th>\n",
+       "      <th>model year</th>\n",
+       "      <th>origin</th>\n",
+       "      <th>car name</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <th>0</th>\n",
+       "      <td>18.0</td>\n",
+       "      <td>8</td>\n",
+       "      <td>307.0</td>\n",
+       "      <td>130.0</td>\n",
+       "      <td>3504</td>\n",
+       "      <td>12.0</td>\n",
+       "      <td>70</td>\n",
+       "      <td>1</td>\n",
+       "      <td>chevrolet chevelle malibu</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>1</th>\n",
+       "      <td>15.0</td>\n",
+       "      <td>8</td>\n",
+       "      <td>350.0</td>\n",
+       "      <td>165.0</td>\n",
+       "      <td>3693</td>\n",
+       "      <td>11.5</td>\n",
+       "      <td>70</td>\n",
+       "      <td>1</td>\n",
+       "      <td>buick skylark 320</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>2</th>\n",
+       "      <td>18.0</td>\n",
+       "      <td>8</td>\n",
+       "      <td>318.0</td>\n",
+       "      <td>150.0</td>\n",
+       "      <td>3436</td>\n",
+       "      <td>11.0</td>\n",
+       "      <td>70</td>\n",
+       "      <td>1</td>\n",
+       "      <td>plymouth satellite</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>3</th>\n",
+       "      <td>16.0</td>\n",
+       "      <td>8</td>\n",
+       "      <td>304.0</td>\n",
+       "      <td>150.0</td>\n",
+       "      <td>3433</td>\n",
+       "      <td>12.0</td>\n",
+       "      <td>70</td>\n",
+       "      <td>1</td>\n",
+       "      <td>amc rebel sst</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <th>4</th>\n",
+       "      <td>17.0</td>\n",
+       "      <td>8</td>\n",
+       "      <td>302.0</td>\n",
+       "      <td>140.0</td>\n",
+       "      <td>3449</td>\n",
+       "      <td>10.5</td>\n",
+       "      <td>70</td>\n",
+       "      <td>1</td>\n",
+       "      <td>ford torino</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "    mpg  cylinders  displacement  horsepower  weight  acceleration  \\\n",
+       "0  18.0          8         307.0       130.0    3504          12.0   \n",
+       "1  15.0          8         350.0       165.0    3693          11.5   \n",
+       "2  18.0          8         318.0       150.0    3436          11.0   \n",
+       "3  16.0          8         304.0       150.0    3433          12.0   \n",
+       "4  17.0          8         302.0       140.0    3449          10.5   \n",
+       "\n",
+       "   model year  origin                   car name  \n",
+       "0          70       1  chevrolet chevelle malibu  \n",
+       "1          70       1          buick skylark 320  \n",
+       "2          70       1         plymouth satellite  \n",
+       "3          70       1              amc rebel sst  \n",
+       "4          70       1                ford torino  "
+      ]
+     },
+     "execution_count": 60,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "data_auto = pd.read_csv(\"/Users/Gullermo R/OneDrive/Documentos/GitHub/python-ml-course/datasets/auto/auto-mpg.csv\")\n",
+    "data_auto.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 61,
+   "id": "3e78c3ba",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(406, 9)"
+      ]
+     },
+     "execution_count": 61,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "data_auto.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 62,
+   "id": "6b40c096",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import matplotlib.pyplot as plt"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 46,
+   "id": "0b504370",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "Text(0.5, 1.0, 'CV vs MPG')"
+      ]
+     },
+     "execution_count": 46,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "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\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "%matplotlib inline\n",
+    "data_auto[\"mpg\"] = data_auto[\"mpg\"].dropna()\n",
+    "data_auto[\"horsepower\"] = data_auto[\"horsepower\"].dropna()\n",
+    "plt.plot(data_auto[\"horsepower\"], data_auto[\"mpg\"], \"ro\")\n",
+    "plt.xlabel(\"Caballos de Potencia\")\n",
+    "plt.ylabel(\"Consumo (millas por galeón)\")\n",
+    "plt.title(\"CV vs MPG\")"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a96685c0",
+   "metadata": {},
+   "source": [
+    "### Modelo de regresión lineal\n",
+    "    * mpg = a + b * horsepower"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 63,
+   "id": "7e123db4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = data_auto[\"horsepower\"].fillna(data_auto[\"horsepower\"].mean()).to_numpy()\n",
+    "Y = data_auto[\"mpg\"].fillna(data_auto[\"mpg\"].mean())\n",
+    "X_data = X[:,np.newaxis]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 64,
+   "id": "199ad212",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "numpy.ndarray"
+      ]
+     },
+     "execution_count": 64,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "type(X)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 65,
+   "id": "32c67cc6",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "numpy.ndarray"
+      ]
+     },
+     "execution_count": 65,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "type(X_data)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 66,
+   "id": "b4ee739b",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "C:\\ProgramData\\Anaconda3\\lib\\site-packages\\sklearn\\base.py:450: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names\n",
+      "  warnings.warn(\n"
+     ]
+    },
+    {
+     "ename": "ValueError",
+     "evalue": "X has 1 features, but LinearRegression is expecting 6 features as input.",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mValueError\u001b[0m                                Traceback (most recent call last)",
+      "Input \u001b[1;32mIn [66]\u001b[0m, in \u001b[0;36m<cell line: 3>\u001b[1;34m()\u001b[0m\n\u001b[0;32m      1\u001b[0m get_ipython()\u001b[38;5;241m.\u001b[39mrun_line_magic(\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mmatplotlib\u001b[39m\u001b[38;5;124m'\u001b[39m, \u001b[38;5;124m'\u001b[39m\u001b[38;5;124minline\u001b[39m\u001b[38;5;124m'\u001b[39m)\n\u001b[0;32m      2\u001b[0m plt\u001b[38;5;241m.\u001b[39mplot(X,Y, \u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mro\u001b[39m\u001b[38;5;124m\"\u001b[39m)\n\u001b[1;32m----> 3\u001b[0m plt\u001b[38;5;241m.\u001b[39mplot(X_data, \u001b[43mlm\u001b[49m\u001b[38;5;241;43m.\u001b[39;49m\u001b[43mpredict\u001b[49m\u001b[43m(\u001b[49m\u001b[43mX_data\u001b[49m\u001b[43m)\u001b[49m, color\u001b[38;5;241m=\u001b[39m\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mblue\u001b[39m\u001b[38;5;124m\"\u001b[39m)\n",
+      "File \u001b[1;32mC:\\ProgramData\\Anaconda3\\lib\\site-packages\\sklearn\\linear_model\\_base.py:362\u001b[0m, in \u001b[0;36mLinearModel.predict\u001b[1;34m(self, X)\u001b[0m\n\u001b[0;32m    348\u001b[0m \u001b[38;5;28;01mdef\u001b[39;00m \u001b[38;5;21mpredict\u001b[39m(\u001b[38;5;28mself\u001b[39m, X):\n\u001b[0;32m    349\u001b[0m     \u001b[38;5;124;03m\"\"\"\u001b[39;00m\n\u001b[0;32m    350\u001b[0m \u001b[38;5;124;03m    Predict using the linear model.\u001b[39;00m\n\u001b[0;32m    351\u001b[0m \n\u001b[1;32m   (...)\u001b[0m\n\u001b[0;32m    360\u001b[0m \u001b[38;5;124;03m        Returns predicted values.\u001b[39;00m\n\u001b[0;32m    361\u001b[0m \u001b[38;5;124;03m    \"\"\"\u001b[39;00m\n\u001b[1;32m--> 362\u001b[0m     \u001b[38;5;28;01mreturn\u001b[39;00m \u001b[38;5;28;43mself\u001b[39;49m\u001b[38;5;241;43m.\u001b[39;49m\u001b[43m_decision_function\u001b[49m\u001b[43m(\u001b[49m\u001b[43mX\u001b[49m\u001b[43m)\u001b[49m\n",
+      "File \u001b[1;32mC:\\ProgramData\\Anaconda3\\lib\\site-packages\\sklearn\\linear_model\\_base.py:345\u001b[0m, in \u001b[0;36mLinearModel._decision_function\u001b[1;34m(self, X)\u001b[0m\n\u001b[0;32m    342\u001b[0m \u001b[38;5;28;01mdef\u001b[39;00m \u001b[38;5;21m_decision_function\u001b[39m(\u001b[38;5;28mself\u001b[39m, X):\n\u001b[0;32m    343\u001b[0m     check_is_fitted(\u001b[38;5;28mself\u001b[39m)\n\u001b[1;32m--> 345\u001b[0m     X \u001b[38;5;241m=\u001b[39m \u001b[38;5;28;43mself\u001b[39;49m\u001b[38;5;241;43m.\u001b[39;49m\u001b[43m_validate_data\u001b[49m\u001b[43m(\u001b[49m\u001b[43mX\u001b[49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[43maccept_sparse\u001b[49m\u001b[38;5;241;43m=\u001b[39;49m\u001b[43m[\u001b[49m\u001b[38;5;124;43m\"\u001b[39;49m\u001b[38;5;124;43mcsr\u001b[39;49m\u001b[38;5;124;43m\"\u001b[39;49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[38;5;124;43m\"\u001b[39;49m\u001b[38;5;124;43mcsc\u001b[39;49m\u001b[38;5;124;43m\"\u001b[39;49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[38;5;124;43m\"\u001b[39;49m\u001b[38;5;124;43mcoo\u001b[39;49m\u001b[38;5;124;43m\"\u001b[39;49m\u001b[43m]\u001b[49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[43mreset\u001b[49m\u001b[38;5;241;43m=\u001b[39;49m\u001b[38;5;28;43;01mFalse\u001b[39;49;00m\u001b[43m)\u001b[49m\n\u001b[0;32m    346\u001b[0m     \u001b[38;5;28;01mreturn\u001b[39;00m safe_sparse_dot(X, \u001b[38;5;28mself\u001b[39m\u001b[38;5;241m.\u001b[39mcoef_\u001b[38;5;241m.\u001b[39mT, dense_output\u001b[38;5;241m=\u001b[39m\u001b[38;5;28;01mTrue\u001b[39;00m) \u001b[38;5;241m+\u001b[39m \u001b[38;5;28mself\u001b[39m\u001b[38;5;241m.\u001b[39mintercept_\n",
+      "File \u001b[1;32mC:\\ProgramData\\Anaconda3\\lib\\site-packages\\sklearn\\base.py:585\u001b[0m, in \u001b[0;36mBaseEstimator._validate_data\u001b[1;34m(self, X, y, reset, validate_separately, **check_params)\u001b[0m\n\u001b[0;32m    582\u001b[0m     out \u001b[38;5;241m=\u001b[39m X, y\n\u001b[0;32m    584\u001b[0m \u001b[38;5;28;01mif\u001b[39;00m \u001b[38;5;129;01mnot\u001b[39;00m no_val_X \u001b[38;5;129;01mand\u001b[39;00m check_params\u001b[38;5;241m.\u001b[39mget(\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mensure_2d\u001b[39m\u001b[38;5;124m\"\u001b[39m, \u001b[38;5;28;01mTrue\u001b[39;00m):\n\u001b[1;32m--> 585\u001b[0m     \u001b[38;5;28;43mself\u001b[39;49m\u001b[38;5;241;43m.\u001b[39;49m\u001b[43m_check_n_features\u001b[49m\u001b[43m(\u001b[49m\u001b[43mX\u001b[49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[43mreset\u001b[49m\u001b[38;5;241;43m=\u001b[39;49m\u001b[43mreset\u001b[49m\u001b[43m)\u001b[49m\n\u001b[0;32m    587\u001b[0m \u001b[38;5;28;01mreturn\u001b[39;00m out\n",
+      "File \u001b[1;32mC:\\ProgramData\\Anaconda3\\lib\\site-packages\\sklearn\\base.py:400\u001b[0m, in \u001b[0;36mBaseEstimator._check_n_features\u001b[1;34m(self, X, reset)\u001b[0m\n\u001b[0;32m    397\u001b[0m     \u001b[38;5;28;01mreturn\u001b[39;00m\n\u001b[0;32m    399\u001b[0m \u001b[38;5;28;01mif\u001b[39;00m n_features \u001b[38;5;241m!=\u001b[39m \u001b[38;5;28mself\u001b[39m\u001b[38;5;241m.\u001b[39mn_features_in_:\n\u001b[1;32m--> 400\u001b[0m     \u001b[38;5;28;01mraise\u001b[39;00m \u001b[38;5;167;01mValueError\u001b[39;00m(\n\u001b[0;32m    401\u001b[0m         \u001b[38;5;124mf\u001b[39m\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mX has \u001b[39m\u001b[38;5;132;01m{\u001b[39;00mn_features\u001b[38;5;132;01m}\u001b[39;00m\u001b[38;5;124m features, but \u001b[39m\u001b[38;5;132;01m{\u001b[39;00m\u001b[38;5;28mself\u001b[39m\u001b[38;5;241m.\u001b[39m\u001b[38;5;18m__class__\u001b[39m\u001b[38;5;241m.\u001b[39m\u001b[38;5;18m__name__\u001b[39m\u001b[38;5;132;01m}\u001b[39;00m\u001b[38;5;124m \u001b[39m\u001b[38;5;124m\"\u001b[39m\n\u001b[0;32m    402\u001b[0m         \u001b[38;5;124mf\u001b[39m\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mis expecting \u001b[39m\u001b[38;5;132;01m{\u001b[39;00m\u001b[38;5;28mself\u001b[39m\u001b[38;5;241m.\u001b[39mn_features_in_\u001b[38;5;132;01m}\u001b[39;00m\u001b[38;5;124m features as input.\u001b[39m\u001b[38;5;124m\"\u001b[39m\n\u001b[0;32m    403\u001b[0m     )\n",
+      "\u001b[1;31mValueError\u001b[0m: X has 1 features, but LinearRegression is expecting 6 features as input."
+     ]
+    },
+    {
+     "data": {
+      "image/png": "iVBORw0KGgoAAAANSUhEUgAAAXAAAAD4CAYAAAD1jb0+AAAAOXRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjUuMSwgaHR0cHM6Ly9tYXRwbG90bGliLm9yZy/YYfK9AAAACXBIWXMAAAsTAAALEwEAmpwYAAAoXUlEQVR4nO2df4wd13Xfv2ff7pO0pFKKj2uBCr27jqUaIFSHkhdpADmG6rUbmXHtOEULFyuCkQywXlYFFcNw5S4QKAUWjR07iYCCtDcJE0K7tePCMSQIDhJBkdraQO2ubIqiIMtUWlKVwoorMobKyBB/nf4xM9l58+bO3Jm58+u97we4ePvu/Dpz5+15951fV1QVhBBC2sdY3QIQQgjJBxU4IYS0FCpwQghpKVTghBDSUqjACSGkpYxXebEdO3bo7OxslZckhJDW8+yzz76hqlPR/koV+OzsLNbX16u8JCGEtB4RORPXTxMKIYS0FCpwQghpKVTghBDSUqjACSGkpVCBE0JIS6ECT2NtDZidBcbGvNe1tbolIoQQABWHEbaOtTXgwAHgrbe892fOeO8BYGGhPrkIIQScgSeztLSpvAPeesvrJ4SQmqECT+KVV7L1E0JIhVCBJzE9na2fEEIqhAo8ieVlYHKyv29y0usnhJCaoQJPYmEBWFkBZmYAEe91ZYUOTEJII2AUShoLC1TYhJBGYj0DF5GOiPxQRJ7w3z8sIq+JyHG/7S1PTEIIIVGyzMAPAXgRwM+E+n5PVb/kViRCCCE2WM3ARWQXgF8B8IflikMIIcQWWxPK7wP4HIBrkf4HROSEiBwVkZucStZEmFZPCGkQqQpcRD4K4JyqPhvZdATAuwHsAXAWwJcNxx8QkXURWd/Y2CgmbZ0KNEirP3MGUN1Mq6cSJ4TUhKhq8g4i/xHAPgBXAFwPzwb+Z6p6b2ifWQBPqOrtSeeam5vT3EuqReuSAF5MdlVhfbOzntKOMjMDnD5d/vUJISOLiDyrqnPR/tQZuKp+XlV3qeosgE8C+CtVvVdEdoZ2+wSAk86kjSOtLknZs3Om1RNCGkaROPAvisgeAArgNIB/7UIgI0kKtIqqgdPT8TNwptUTQmoi1YTikkImlCQTBlC+eaNuEw4hZGTJbUJpDMvLwMREf9/EhNdfhXmDafWEkIbRrlR6kfj3VZk3mFZPCGkQ7ZmBLy0Bly7191265PWzaiAhZARpjwKPm2EH/TRvEEJGkPaYUDod4OrV+H6A5g1CyMjRnhl4nPJO6ieEkCGnPQo8CBe07SeEkCGnPQqcjkpCCOmjPQqcjkpCCOmjPU5MgI5KQggJ0Z4ZeNthLXFCiGPaNQNvK1UU2yKEjBycgVdBWilcQgjJARV4FQxDLXGagAhpHFTgabhQXKaiWm2pJc7l5AhpJFTgSbhSXG2PYacJiJBGQgWehCvF1fYY9mEwAREyhDAKJQmXiqvNMexcTo6QRmI9AxeRjoj8UESe8N9vF5EnReSU/3pTeWLWRNtt165ouwmIkCEliwnlEIAXQ+8fAvCUqt4G4Cn//XBBxeXRdhMQIUOKlQIXkV0AfgXAH4a6Pw7gmP/3MQC/6lSyJkDFtcnCgrdA9LVr3usojgEhDcN2Bv77AD4H4Fqo72ZVPQsA/us74g4UkQMisi4i6xsbG0VkrYc0xcX4aEJITaQqcBH5KIBzqvpsnguo6oqqzqnq3NTUVJ5TNBfGRxNCasRmBn4XgI+JyGkAXwfwQRFZBfC6iOwEAP/1XGlSusR2xmyzH+OjCSE1kqrAVfXzqrpLVWcBfBLAX6nqvQAeB7Df320/gMdKk9IVtjNm2/0YH00IqZEiiTy/DeDDInIKwIf9983GdsZsux/DDAkhNZJJgavqM6r6Uf/v86o6r6q3+a8XyhHRIbYzZtv9GGZICKmR0Uqlt50x2+7HMENCSI2MlgKPmzGLeDbuwFG5tgZcvDh47OQkcOutwPi4d8z4OHDwYDXx0QxVJITEMFq1UALlurTkKW0Rz0kJeO/vu8/ru3Sp/7heD9izB3jqqc2+q1eBI0e8vw8fLk9mruZDCDEgGiiwCpibm9P19fXKrpfI7Gx8gaY4ZmaAV1/1lHaUTge4csWpaH2Y5JyZ8Wb8hJChR0SeVdW5aP9ozcDDZAn1e+WVzZl6lDil7hKGKhJCDIyWDTxMllC/6Wlvpm2iTLs0QxUJIQZGV4HHOTRNXLyYPNMuM4WeoYqEEAOjq8CjIYBJM+zz59PPV1YKfdZQRUasEDIyjK4TM0o02iMPIl44YV3E3cPkJGPTCWk5Jifm6M7Ao8TNdLNSt12axbUIGSmowMNEk3KyUrddmhErhIwUo63A0+zFvZ79uXq9+s0UjFghZKQYPQUeKG0RYN++5JKxjzzipcynIeI5OsNfAuHrBOn3WZ2KSV8wcdsYsULIaKGqlbX3ve99Wiurq6qTk6qeyo5vMzP9x/R6yftH2+Sk6uKi+TqTk54ceWQNjk3bNjOjKuK92lyLENJoAKxrjE4drSgUm/T5aCTJ2Jg5C9NEp5McNx5Og19b85yMr7zimTqWlz1TTFIKPcD0ekJGCKbSA3bOvLjSsrY1UwLS0usDOZIKVeVxSNJZSchIMVo28DRnXpy92JSx2euZnZxJSUFhOZLC/pIcknRWEkJgtyr99SLyfRF5TkReEJHf8vsfFpHXROS43/aWL25BktLnOx1g//7BSJK4+PDVVc/BGcfkpDeLNl0n/CWRNMtOckguLwPdbv+2bpfOSkJGDJsZ+NsAPqiqPw9gD4B7ROQX/W2/p6p7/PbtsoR0RlgZA55CDrh6FTh2LD5KJC4+/MCBwRT7Xs87/+HD/dcJZuTRNPikmXRaCn3ULl+hL4MQ0gwyOTFFZBLAdwAsAvgIgIuq+iXb42t3YoYxOQl7PWDr1kGnos2xWZ2IeVPfWSOckJGiUCq9iHRE5DiAcwCeVNXv+ZseEJETInJURG4yHHtARNZFZH1jYyOv/O4xmS/On++PDb/vPmDHjv54a9OxZ85ki/POu6ZmHRmXLJJFSPOIiy00NQDbADwN4HYANwPowPsSWAZwNO342uPAw8zMZIvvDsdbJ8WGd7vpsddFY7VNskdj2F2RFHdOCCkdGOLAM0WhqOpPADwD4B5VfV1Vr6rqNQB/AOAXHH2nVEOWeuBh3noLePvtfvt5mEuXgEOHzMcHZpOkDNA0lpeBiYn+vomJ8pyYLJJFSCOxiUKZEpFt/t83APgQgB+JyM7Qbp8AcLIUCcsiznxhW/vk4sVkp2FS/XBXyjD6BWL6QnEBi2QR0khsZuA7ATwtIicA/E94NvAnAHxRRJ73+/8JgN8oUc5yiEaXPPJIvll5ElHbsSkpKIsyXFryZvphLl0qb0bMuHNCGkmqAlfVE6p6h6q+V1VvV9X/4PfvU9V/5Pd/TFXPli9uyURn5UWJM5eYzhtWhmkOwyQnahkORhbJIqSZxBnGy2qNcmLakNfRuXVr8vEiZoegjcMwTa4yHIwskkVIbYDFrHKQd5m1Xg94443kQlgzM/Gx5jYx3jZyMSackKFhdJZUO3hws/72+Lj3Pi/RzE1bLlzwlOyYYXgD5RrY3sNx3zYOQxu5stjUGeNNSDuJm5aX1Uo1oayueqaLOJPC4qKb80dNG1FTSNB6vfz1wLPGeBeNCR/WGG+afMgQAYMJZTgUeNpCDZ2Ou+uElULcwg1JiT6djl2STxaFWlQBV50UVAXD+qVERhaTAh8OE0pcbHWYtPrcebnrrv6olV4PuOEGcxy4jRxZ0+vzpuMHDGOMNxOPyIgwHE7MtFVzOh3gypVi1zAVntq/H/j2tzdDBNPGs9sFjh6tfwHkgGEsjGX6PERXWyKkJQy3EzMtoSRY5caEzeLB994bP6s7cmRTAdp8Gaal2tvKlYdRWQiZiUdkVIizq5TVKreBi6Q7MNMWCJ6YMNvWi7Q891TEjjtKCyHTBk6GDAy1E1M1vxJKcuJlXZHepQJ37VwcRmdlEsP2pURGGpMCHw4beBGS7KVljU2Q6JNXrjx2XNqFCWktw20DL0LV9tJOx7yeps3188pFuzAhQ8fwKPC8Dr8kJ55tedksmLIzA4L7MBW+ungxnzNzGJ2VhIw6cXaVslqlTswsTiuTvXRxsRz7t8nunJaQVNQhR7swIa0EQ20DLyuWOal+d1FWV+0XS46jzXHahJBMDLcN3GU2YdgUU0R5R5c8i7Jvn2ciCZt7ssjb5kxJQogThkOBu3LQRRdgyEKv15/O/sd/nLx/cP7wmphZ5KXzkZCRx2ZNzOtF5Psi8pyIvCAiv+X3bxeRJ0XklP96U/niGnDloEurqWJictKLLImWiLUtQxvU6Yi7j253cDZP5yMhBHYz8LcBfFBVfx7AHgD3iMgvAngIwFOqehuAp/z39VC0oFNAHrPE2Jh3zX37BqNf4hSyiTNnPCW+f39/cawbbwQuX/bCD4H890YIGT7iPJumBmASwA8A/GMALwHY6ffvBPBS2vGNX1LNReZlNEJkdVV1y5bsx2eJrGF0CSFDDYqk0gPoADgO4CKAL/h9P4ns87dp52m0Al9dVe123YQJRut+Z11bc2bGPvWddT8IGXpMCjxTGKGIbAPwLQD/FsB3VHVbaNvfquqAHVxEDgA4AADT09PvO1NWWF5RXIcMTk5umjrSyt1GCRJ44o6Jpr4PYzlYQkgfTsIIVfUnAJ4BcA+A10Vkp3/ynQDOGY5ZUdU5VZ2bmprKKnd1uA7LCy8gYIoYCezaUaan7SNrhnFBBkKIFTZRKFP+zBsicgOADwH4EYDHAez3d9sP4LGSZBwkLm2+aO1sk8KMS2e35ZVXPDkuXow/79Wrg+efnAT27o0/ZmJiMPqENU4IGV3i7CrhBuC9AH4I4ASAkwB+0+/vwYs+OeW/bk87lxMbeJzNd2Ji0H6d1Q5ssiUvLm46CE2LJpta0uLG4RYsjmxaZzNo3e7gPbXFBk5HKyG5wdDUA8/iEMxa69pGyWSpV5IlqiWQNe3+4u6p6cqxLV8yhDQUkwJvXyZmmenmCwuDyThx+wQx50msrAAXLthfO5A1TeY22ra5yDAhpdA+Bd6EdPNA0ZuckJ2Ot08eWdOOiW6Ppv+HU/ObAh2thJRC+xR4XHbjxISXch6minRz02LJQf/y8qCSFxmUFfAU79gYcOut5uxNEW+/2Vng4MHkxZbvvdfNQsguoKOVkHKIs6uU1Zwl8sTZfOuyAy8ueok7QQJPeBFlUz3x+flk+/j8/KYtPDh34OjM2lzZmouML23ghBQCQ10PvKmMj3uhglE6HWDXLnPiUKcDXLmy+b5oklHRpJ7ATBOe6YcTlWzPsbTkmU2mp71fJ6znQogVpkQeKvAySYohT1s0ObwtayZnHDMz+ZUnsz0JqZXhXtChCcQlEiU5OZPsv8G6mcE5iyrvwHYeODnvuw/YscM+6YlOSEIayWgr8KLZm+HzxEWC3H13/P4HDiQ7WCcmPAV7773F67PEzfQvXwbOn7ePWqETkpBGMroK3GX4nSnO+eWXgcXFzZl4p+O9P3w42YTx9tuegi3KzIzd7D0tJtvFghmuviwJIZvEeTbLao0qJ2tbrtUGU4SISD4ZXLROJ9s10mRNirZJg1EohBQCQ5OJ6QqXdl2TKWH79uTjsqzYk5Ug+sX2GknmkLU14NixzXNeveq9t51FMxOTkFIYXQXu0q67vByfnPPmm8lKLm4puF4v+/XjCMw20Wv0etmTnooqYDpBCSmF0VXgrhZCBjwleeONg/2XL6cruWj9lUcecTMrD2eJhq/xxhvA0aPZ1g8tqoDpBCWkFJqvwA8e9BJiRLzXgwfdnDfPQshhR9yOHV4L5DI5Hc+cGZQ/OI+IN1MW8dqOHd4xKyvmEEQbrrsOOHJk87pRp6FN0a4weRVwcJ9nzsTXPS+71AEhw06cYbysltmJaUpFz+JAc4VtGVmbNjZm3jYxkb6ocR7nZxGnYR4nZNwx4brndGASYg1aWQ88iHowRVhUSZkRI6ZIGFP9kbxfJr1esXomWY51GeVDyIhjUuDNTqVPSkWvUG4A2dPZZ2byJ+FEFy6O4+BB4CtfKTYOWeuZZCFpvIqk9RMygrQzlT4pFb1qsjjcghoheeW0udY3vlH8S6zMUL6kNUabXLuckBZhs6jxO0XkaRF5UUReEJFDfv/DIvKaiBz3217n0qXV266SLDHbFy9uZnrmITg+jrU1z9npIlMTsI8kScukjG7fuzd+vKJfOowHJyQ/cXaVcAOwE8Cd/t83AvgxgN0AHgbw2bTjwy1XJmaRDEDXhO3Avd5mTe+4TMxgQeQkh2VWp6NLR2oWm3SaEzNtQWjTGIWdm4QQI3DlxATwGIAPV6bAy8TVIhAmh53JCZtXubp2pNpGpqQ5JPNup2OTECtMCjyTDVxEZgHcAeB7ftcDInJCRI6KyE2GYw6IyLqIrG9sbGS5XLm4LGZlMkPELeZQ5LyuMxdtHZhpiTx5twOMByekANYKXES2AvgmgAdV9U0ARwC8G8AeAGcBfDnuOFVdUdU5VZ2bmpoqLrErXNbnMDnskpyYNmnz0fO6zFwMFl62IS2RJ+/2Tqf/S4QVCwnJRty0PNoATAD4CwCfMWyfBXAy7TyNMqHkrSAYR5INOGpG6XTs4rmDhJ6066S1tLU0bfwKNjbwbrd/e7ebbiMP3x8rFhJiBHlNKCIiAP4IwIuq+ruh/p2h3T4B4KSzb5UqcFmfw5SWDwyaUa5eBb773f7j4mbi4Rj4YGa6bx9www3J8fFJ54nj6lUv7T6pRIFN2QHvizz+vc3xrFhISHbitHq4AXg/AAVwAsBxv+0F8CiA5/3+xwHsTDtXo2bgVcz4bDNJk5yAcXJ2u94M3aVDM5itm5y5SQ5fF1mXLn8RETJkoJWp9FFcRY2Udb4oScoyTJLyMinHIC3etRLPY96wUb5pY92U1PsyPhNN/Nw2KTyXpNJ+Bd5GG6mLGXiacixDgUcVZ5py3bIlfvuWLd72ttjAy5DB9TldnK9JReKIFe1X4FlmaGXPrG0x/aPMz/fLt7hortxn+hLYutVuBj4+nk+Bh2fPSfupmpOVxsa87bbPLu25lf1cy/gV4PqcLs7XpCJxxIr2K3BbG2kTZnJhoj9V5+eLZS1maTMz3vXyHhtQ5FeAzfE2VPFcy7DDuz6ni/OlPS/SONqvwG1nHk2xpZoomrVoo3jDSi1PNmhUMab9w6fN6Fw8kyqeK2fg+WQipWNS4M2uRhjGdgm0pq+/WCRrMQ9ZskFtVyaKklZ0zMXydVU8V5fL7JV1Thfna1KROFKMOK1eVqskCmXUZ+DRGbTtDDxpfIKiXdHW63nbV1cHbe3j44NOyiL266qeK6NQSANB600otjTNBh4lT2W/PHHfgWIzOVKzjE9apmUVyrXpz5WQEhkdBa5aXxRK0nXjStFmibaIS8tPaoFTa3VV9brr+rfdckt/5Ei3myyPavKMLcnp6nL8mxJdREjFjJYCr4OkGWLR2WOeGiiBgovOnLOaYNLuTTXd7MOZMiGFMCnwZq+J2SZmZ+PXwJyZ8V5N206fzn9uE8Fal0tL+dflDMuWdG+nT3u1Wn7914ErV8zn27oV+OlPPadqp+M5zA4fzicbISNGO9fEbBNJURJFIyhs9guKVoWjSIpEaISPTZP/u99NVt6At0xcEBFjU0CLEJIKFbgrkqobFq18mFRPOwj9e/RRz2Bx+vRmCGCR+uHhY9PkDyovZiXvcYQQAFTg7lheBiYm+vsmJrz+orG7ew3rRW/b5inu5WXPXBJdCGF5OXlRCRNR2ZaXgW53cL8zZ7zr5V15qOiKRYSMOON1CzBURGtvB++DGfHSkmd2mJ72lKJNsszaGvDVr8ZvO38euP9+b+Z9+bLXFywNF1z30KH4FezHxoBr17y/t2wBrr8euHDBLJvJV5JmY5+Z8e457vg8Xy6EkL+HM3BXLC0Bly719126tLkgwcKCZ964dq3fzJHGoUObijaOS5c2lXdAeCGECxfijwvHiXz1q56T0cTS0uA1bNiyxbvXT386fjsz/wgpBGfgrigr1Ttu9mxDcN3t2+PPsX279xos7hyshhOdwQd9efi7v/Neg2iTlRVGoRDiEM7AXeFyiTYX2F7XtJTZoUObCwznJWwiOXzYi1RR9V6bpry5oDJpITZrYr5TRJ4WkRdF5AUROeT3bxeRJ0XklP96U/niNpgyCiEByaaNJN54w1NCJhNK0G/6hXD+vDfzLpInUMRJWaVCDX6FBPcb/AqhEidNJy67J9wA7ARwp//3jQB+DGA3gC8CeMjvfwjAF9LONdSZmKrlpHqbCknZZlRu3Rq/LShEZdqeJeMz7Rp5xrHKuidNL4BGRh64ysQUkccA/Ce/3a2qZ/0V6p9R1fckHTvUmZhlkWUFetPxcc+41/Nm6WNj+WfZi4ueKWTr1k17d5gtW7wEnqykZX66xjQGIskOZEIqwkkmpojMArgDwPcA3KyqZwHAf32H4ZgDIrIuIusbGxuZBR95iobamZRzYELJo7w7nU3lDcQr76T+NKqu6W7yF4yN0YxCGo21AheRrQC+CeBBVX3T9jhVXVHVOVWdm5qayiPjaFM02cX0BRAorSxfEL2eNyvdtQu4665iciVhUqjbt5djF4/zXwDe2Edt4XR2kiYRZ1eJNgATAP4CwGdCfS8B2KmbdvKX0s4z9DbwMiiywEOw1ma0lnins1k+1rSifLRFS9lG1/FMq4qYhTgb+MTEYGVFl3bx1VVzud7AFs6a5KQmkNcGLiIC4BiAC6r6YKj/dwCcV9XfFpGHAGxX1c8lnYs28BwcPOgVfsrD6qr3ev/9g0lGaYyPezPQ6WnPjh0XS26yr0cJqiNmWaZtba0/c9Ukg0u7eJotvGrbPCE+Jhu4jQJ/P4D/DuB5AIFH59/Ds4N/A8A0gFcA/AtVNcSseVCB5yBrKdkwqsWPB4o5OgOKKrkqHI1pCprOTlITuZ2YqvodVRVVfa+q7vHbt1X1vKrOq+pt/mui8iY5Keq4c+H4c5GMVFSOKhKl0mL5bWSgjZxUCDMxm05eBRU4J10ouDjFljW8sagcZSVKhVlY8Ew9MzObZXrDpp80GZgQRKomzjBeVqMTMwdxjjObtTGDNSvzLMcGqO7ePShHOElpcdH+vLaOvrREqKKJUrZrliadO2k/JgSRkgDXxGwQWRVR3P67d5sV5vx8//HRBYnTFO4NNwzKMD8/eI1ArrTolfACyEn3WDTCI01Bl7VmaYBpcedggWlCckIF3hRcKIvFRfsZb94ZePhLIKq8o/ukhSLa3F/R2WvehZdnZtzNnE1lD/KWFEi6V9clG0ijoQJvCnmURfQf1jTTiztfkTjygLR9bOq1pCnDIrNXmxjupPMnjWf010OS8qxCgTMWfSShAm8KWRVV3hl0cL68yjuLAs8ij4m8s+C08Qmum2cGHlXiacqzChMK7ewjCRV4U8j6D5h3Bh2cz8bmXVSB21wjjyIuYnqJXjerDTzcOh27Z1eFcqWdfSShAm8KWRWVjbkk2sLny6u8s9jAs8iTNjZZo1CSxmdiwj7SZHU1+R6SnkWgPFdXB8sWZJHBBs7ARxIq8CaR5Z/Y9A+7devmzFfEe58ltC1oY2Px/VGZ4qJQApJqirtyspm++JLs791utmubxmJszNuepjxXVwfrtYRlcBVpQxv4yEEF3laK/sMWic6wxdXP+jwx1r1esvnDxnQTXNN0H1u2bO5bZCxdzZ6riEJhpEujoAJvM2UmsLhQvmmmB1sZ8zoIk8wfSfdh6yAOn6PIWLbFfs1ZfuOgAifxuJgVmpyYgfPPhRx5t/d62Wf1eceiCU5OF7RFzhHCpMBZC2XUWV4eXHl+bGywxsjBg16JWRHv9eDBzW0HDsSf29QfR9oqPGl1SOK2d7vAm2+aa5PYFNiamLCvt7J372CfSLKMruu5AMULalW9ItKwU2aBszitXlbjDLyBmLI6wwksafusrg46AMfGsv3ktpn1ZY1SMTk4syQ52TpC48YgaGGHb9m2ZRfmj6oySkcBR+Yo0IRCYrExf6Tt4+Indxl2V5uwPxsbuM19pH0ZVIWLZ0EF7g5H5iiTAqcJZdQxrbkZ7k/bx8VP7oUFYP/+zTK4nY73PssqPlHS6ndHy8eaOHNm86ev6edwU8wLLp7FBUNpf1N/HKyL7lG2OSpOq5fVOANvIMM8A896zrRZdLc7mKgTnK8pM3AXs+eyC4uNEiXPwFOVLoCjAM4BOBnqexjAawCO+21v2nl0FBR4tGyrTRnVunFlA0/LQEzD1ZdA1L6cxeact+5McF4bG7gLyi6oVVQBF3mWwxZ/XrcNHMAHANwZo8A/m3ZstA21ArdRhE0krpJfpzP4AUv6ckrLQLShaIy0q1mfzWzaNMPeti1+2y23ZJOhyH26+hVQRJHmlWFYZ+4OvpRMCjx1UWMAEJFZAE+o6u3++4cBXFTVL2Ux1wz1osbBKu5ROh3gypXq5bHFxUrrTTiH6xXjsy4GrZpsR7f4P7Mi7T6b8DnMK4PrZzhE5F7UOIEHROSEiBwVkZsSLnxARNZFZH1jY6PA5RqOjTOwibhwsrg4R9EYadfOojh5iuDKmZd2n034HOaVgfHnmcmrwI8AeDeAPQDOAviyaUdVXVHVOVWdm5qaynm5FhBET9j2NwUXq727OEfagsJVyJAmj2mGbfOMVd0scpx2nzMz8dtN/WWQVwbXz3AUiLOrRBuAWYRs4Lbboo028AYyLBXyqpAh7RnfcoudvbxISnrafbb5WTRB9oaCIok8USUNYGfo798A8HWb8wy1AldtZxSKqhvPfxOiB7LKkCdqJe4Zh4/J4vTMex9pnzObcSj7s5r381D15yhrdm/WZ+GI3AocwNfgmUkuA3gVwKcAPArgeQAnADweVuhJbegVOGkPcbO9iYnBaJq0GWDe0EPTP3oVM+y2/lp0TdGxrnAcTQrcKgrFFUMdhULaRZYok6QoiKzRKgGmiIy0SAwXkRpNiFRpAkXHusJxNEWhUIGT0WRszD60TwS4dq34eaLEHWc6XyBD2nYbqgh3bANFx7rCcSwjjJCQ9uIiyibrecKYIlfSIjFcRGq0NWLKNUXHugHjSAVO2k9QOElks0VrlkeJi/OemPCOC9Pt9seiR+ui33prvnjxq1fjC2RdvOjJESZa9zy6PVqzPKl2O+CmfnsabShmlTaWabkJVYxjGnGG8bIanZjEOWlOxCSHUjTCYHExuaaLyWk1P5+cfr9tm7kgWJzjtNv1apfERT6klS2wcaxFF6gO30dZz6SJ4YA2JSAaHoVCGzhpN2lOxCwOpaJOqzSbqAvHqQvHWtm227akxLdFTtCJSYYVGyei7We8qNMqbbsLx6kLx1rZCtyFo7UK2iIn6MQkw0qa8y6LQ6lsp1WZ5Qka5FhrTUp8W+RMgAqctJu0olNZHEpFnVa7d8dvD/pNjtNut7+v2/WcmXEOwLhziGyuGnT33ckyAsD8fPw+4f40R2gSRQqTVen8dLHIdN3O2jjDeFmNTkxSCnE1vPM6lIo6rXbv7pdj9+7084f7ej3zqj9x9xtN35+c9JyRaY61qCMz7MB0kWGYJyW+DudnkdT9CuUFnZiEtIAsjrWynHB1ZWq2yKkIoFJ56cQkpA1kcayV5YSrK1OzRU5FAJXKSycmIW0gi2OtLCdcXY7QtjkVGyAvFTghLinq1MriWHPhhIujrgxD107FHTu8VpaDsazxz0KcYbysRicmGWpcL6xs41gro3726qrq+Hj/fYyPV5NJ6dqpWLaDsaL65aATk5CSaZsTzkRb78Mm07Xp92CANnBCymZYFuVt633YyNf0e8gIFTghrmiAU8sJbb0PG/mafg8ZSVXgInJURM6JyMlQ33YReVJETvmvN5UrJiEtoAlOLRe09T7SsnLbcA8ZsZmB/wmAeyJ9DwF4SlVvA/CU/56Q0WZhAVhZ8eysIt7ryorX3yaach9ZI3qicvd6Xku6h7pT4Qti5cQUkVkAT6jq7f77lwDcrapnRWQngGdU9T1p56ETkxBixdqaF7b41lubfZOTbr9IqriGI1w7MW9W1bMA4L++o4hwhBDSx9JSv2IFvPdLS+26RsmU7sQUkQMisi4i6xsbG2VfjhAyDFQRCdPWaJsQeRX4677pBP7rOdOOqrqiqnOqOjc1NZXzcoSQkaKKSJi2RtuEyKvAHwew3/97P4DH3IhDCBlasjgMq4iEaWu0TZi49MxwA/A1AGcBXAbwKoBPAejBiz455b9uTzuPMpWekNElT5mBKtLUK0qFLwqYSk8IqY22puc3BKbSE0LqYwgchk2ECpwQUj5D4DBsIlTghJDyGQaHYQOhAieElE9T0vOHjPG6BSCEjAgLC1TYjuEMnBBCWgoVOCGEtBQqcEIIaSlU4IQQ0lKowAkhpKVUmkovIhsAUpaNzsUOAG+UcF6XUEZ3tEHONsgItENOygjMqOpAOddKFXhZiMh6XJ2AJkEZ3dEGOdsgI9AOOSmjGZpQCCGkpVCBE0JISxkWBb5StwAWUEZ3tEHONsgItENOymhgKGzghBAyigzLDJwQQkYOKnBCCGkprVPgInJaRJ4XkeMisu73bReRJ0XklP96U80yvseXL2hvisiDIvKwiLwW6t9bsVxHReSciJwM9RnHTkQ+LyIvi8hLIvLLNcr4OyLyIxE5ISLfEpFtfv+siPw0NJ5fqULGBDmNz7dBY/mnIflOi8hxv7+WsRSRd4rI0yLyooi8ICKH/P7GfC4TZKz/cxm3UGaTG4DTAHZE+r4I4CH/74cAfKFuOUOydQD8XwAzAB4G8NkaZfkAgDsBnEwbOwC7ATwH4DoA7wLw1wA6Ncn4TwGM+39/ISTjbHi/Boxl7PNt0lhGtn8ZwG/WOZYAdgK40//7RgA/9serMZ/LBBlr/1y2bgZu4OMAjvl/HwPwq/WJMsA8gL9W1TIyUDOhqv8NwIVIt2nsPg7g66r6tqr+bwAvA/iFOmRU1b9U1Sv+2/8BYFfZcqRhGEsTjRnLABERAP8SwNfKliMJVT2rqj/w//5/AF4E8LNo0OfSJGMTPpdtVOAK4C9F5FkROeD33ayqZwFvsAG8ozbpBvkk+v9JHvB/ch2t29TjYxq7nwXwf0L7ver31c39AP489P5dIvJDEfmvIvJLdQkVIu75NnEsfwnA66p6KtRX61iKyCyAOwB8Dw39XEZkDFPL57KNCvwuVb0TwEcA/BsR+UDdApkQkS6AjwH4L37XEQDvBrAHwFl4P2GbisT01RpzKiJLAK4AWPO7zgKYVtU7AHwGwH8WkZ+pSz6Yn2/jxhLAv0L/xKLWsRSRrQC+CeBBVX0zadeYvkrG0iRjnZ/L1ilwVf0b//UcgG/B+/n0uojsBAD/9Vx9EvbxEQA/UNXXAUBVX1fVq6p6DcAfoIKf0RaYxu5VAO8M7bcLwN9ULNvfIyL7AXwUwIL6hkb/Z/R5/+9n4dlD/2FdMiY836aN5TiAXwPwp0FfnWMpIhPwFOOaqv6Z392oz6VBxto/l61S4CKyRURuDP6G50Q4CeBxAPv93fYDeKweCQfom+UEH0ifT8CTvW5MY/c4gE+KyHUi8i4AtwH4fg3yQUTuAfDvAHxMVd8K9U+JSMf/++d8Gf9XHTL6Mpieb2PG0udDAH6kqq8GHXWNpW+L/yMAL6rq74Y2NeZzaZKxEZ/LKjylrhqAn4PngX4OwAsAlvz+HoCnAJzyX7c3QNZJAOcB/INQ36MAngdwAt4HcWfFMn0N3s+7y/BmMp9KGjsAS/BmDy8B+EiNMr4Mz+553G9f8ff95/7n4DkAPwDwz2oeS+PzbcpY+v1/AuDTkX1rGUsA74dnAjkRer57m/S5TJCx9s8lU+kJIaSltMqEQgghZBMqcEIIaSlU4IQQ0lKowAkhpKVQgRNCSEuhAieEkJZCBU4IIS3l/wOx1Xskmdt9rAAAAABJRU5ErkJggg==\n",
+      "text/plain": [
+       "<Figure size 432x288 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "%matplotlib inline\n",
+    "plt.plot(X,Y, \"ro\")\n",
+    "plt.plot(X_data, lm.predict(X_data), color=\"blue\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 55,
+   "id": "6b8caf1e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#lm.score(X_data, Y)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 52,
+   "id": "ce501ca2",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "C:\\ProgramData\\Anaconda3\\lib\\site-packages\\sklearn\\base.py:450: UserWarning: X does not have valid feature names, but LinearRegression was fitted with feature names\n",
+      "  warnings.warn(\n"
+     ]
+    },
+    {
+     "ename": "ValueError",
+     "evalue": "X has 1 features, but LinearRegression is expecting 6 features as input.",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mValueError\u001b[0m                                Traceback (most recent call last)",
+      "Input \u001b[1;32mIn [52]\u001b[0m, in \u001b[0;36m<cell line: 1>\u001b[1;34m()\u001b[0m\n\u001b[1;32m----> 1\u001b[0m SSD \u001b[38;5;241m=\u001b[39m np\u001b[38;5;241m.\u001b[39msum((Y \u001b[38;5;241m-\u001b[39m \u001b[43mlm\u001b[49m\u001b[38;5;241;43m.\u001b[39;49m\u001b[43mpredict\u001b[49m\u001b[43m(\u001b[49m\u001b[43mX_data\u001b[49m\u001b[43m)\u001b[49m)\u001b[38;5;241m*\u001b[39m\u001b[38;5;241m*\u001b[39m\u001b[38;5;241m2\u001b[39m)\n\u001b[0;32m      2\u001b[0m RSE \u001b[38;5;241m=\u001b[39m np\u001b[38;5;241m.\u001b[39msqrt(SSD\u001b[38;5;241m/\u001b[39m(\u001b[38;5;28mlen\u001b[39m(X_data)\u001b[38;5;241m-\u001b[39m\u001b[38;5;241m1\u001b[39m))\n\u001b[0;32m      3\u001b[0m y_mean \u001b[38;5;241m=\u001b[39m np\u001b[38;5;241m.\u001b[39mmean(Y)\n",
+      "File \u001b[1;32mC:\\ProgramData\\Anaconda3\\lib\\site-packages\\sklearn\\linear_model\\_base.py:362\u001b[0m, in \u001b[0;36mLinearModel.predict\u001b[1;34m(self, X)\u001b[0m\n\u001b[0;32m    348\u001b[0m \u001b[38;5;28;01mdef\u001b[39;00m \u001b[38;5;21mpredict\u001b[39m(\u001b[38;5;28mself\u001b[39m, X):\n\u001b[0;32m    349\u001b[0m     \u001b[38;5;124;03m\"\"\"\u001b[39;00m\n\u001b[0;32m    350\u001b[0m \u001b[38;5;124;03m    Predict using the linear model.\u001b[39;00m\n\u001b[0;32m    351\u001b[0m \n\u001b[1;32m   (...)\u001b[0m\n\u001b[0;32m    360\u001b[0m \u001b[38;5;124;03m        Returns predicted values.\u001b[39;00m\n\u001b[0;32m    361\u001b[0m \u001b[38;5;124;03m    \"\"\"\u001b[39;00m\n\u001b[1;32m--> 362\u001b[0m     \u001b[38;5;28;01mreturn\u001b[39;00m \u001b[38;5;28;43mself\u001b[39;49m\u001b[38;5;241;43m.\u001b[39;49m\u001b[43m_decision_function\u001b[49m\u001b[43m(\u001b[49m\u001b[43mX\u001b[49m\u001b[43m)\u001b[49m\n",
+      "File \u001b[1;32mC:\\ProgramData\\Anaconda3\\lib\\site-packages\\sklearn\\linear_model\\_base.py:345\u001b[0m, in \u001b[0;36mLinearModel._decision_function\u001b[1;34m(self, X)\u001b[0m\n\u001b[0;32m    342\u001b[0m \u001b[38;5;28;01mdef\u001b[39;00m \u001b[38;5;21m_decision_function\u001b[39m(\u001b[38;5;28mself\u001b[39m, X):\n\u001b[0;32m    343\u001b[0m     check_is_fitted(\u001b[38;5;28mself\u001b[39m)\n\u001b[1;32m--> 345\u001b[0m     X \u001b[38;5;241m=\u001b[39m \u001b[38;5;28;43mself\u001b[39;49m\u001b[38;5;241;43m.\u001b[39;49m\u001b[43m_validate_data\u001b[49m\u001b[43m(\u001b[49m\u001b[43mX\u001b[49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[43maccept_sparse\u001b[49m\u001b[38;5;241;43m=\u001b[39;49m\u001b[43m[\u001b[49m\u001b[38;5;124;43m\"\u001b[39;49m\u001b[38;5;124;43mcsr\u001b[39;49m\u001b[38;5;124;43m\"\u001b[39;49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[38;5;124;43m\"\u001b[39;49m\u001b[38;5;124;43mcsc\u001b[39;49m\u001b[38;5;124;43m\"\u001b[39;49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[38;5;124;43m\"\u001b[39;49m\u001b[38;5;124;43mcoo\u001b[39;49m\u001b[38;5;124;43m\"\u001b[39;49m\u001b[43m]\u001b[49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[43mreset\u001b[49m\u001b[38;5;241;43m=\u001b[39;49m\u001b[38;5;28;43;01mFalse\u001b[39;49;00m\u001b[43m)\u001b[49m\n\u001b[0;32m    346\u001b[0m     \u001b[38;5;28;01mreturn\u001b[39;00m safe_sparse_dot(X, \u001b[38;5;28mself\u001b[39m\u001b[38;5;241m.\u001b[39mcoef_\u001b[38;5;241m.\u001b[39mT, dense_output\u001b[38;5;241m=\u001b[39m\u001b[38;5;28;01mTrue\u001b[39;00m) \u001b[38;5;241m+\u001b[39m \u001b[38;5;28mself\u001b[39m\u001b[38;5;241m.\u001b[39mintercept_\n",
+      "File \u001b[1;32mC:\\ProgramData\\Anaconda3\\lib\\site-packages\\sklearn\\base.py:585\u001b[0m, in \u001b[0;36mBaseEstimator._validate_data\u001b[1;34m(self, X, y, reset, validate_separately, **check_params)\u001b[0m\n\u001b[0;32m    582\u001b[0m     out \u001b[38;5;241m=\u001b[39m X, y\n\u001b[0;32m    584\u001b[0m \u001b[38;5;28;01mif\u001b[39;00m \u001b[38;5;129;01mnot\u001b[39;00m no_val_X \u001b[38;5;129;01mand\u001b[39;00m check_params\u001b[38;5;241m.\u001b[39mget(\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mensure_2d\u001b[39m\u001b[38;5;124m\"\u001b[39m, \u001b[38;5;28;01mTrue\u001b[39;00m):\n\u001b[1;32m--> 585\u001b[0m     \u001b[38;5;28;43mself\u001b[39;49m\u001b[38;5;241;43m.\u001b[39;49m\u001b[43m_check_n_features\u001b[49m\u001b[43m(\u001b[49m\u001b[43mX\u001b[49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[43mreset\u001b[49m\u001b[38;5;241;43m=\u001b[39;49m\u001b[43mreset\u001b[49m\u001b[43m)\u001b[49m\n\u001b[0;32m    587\u001b[0m \u001b[38;5;28;01mreturn\u001b[39;00m out\n",
+      "File \u001b[1;32mC:\\ProgramData\\Anaconda3\\lib\\site-packages\\sklearn\\base.py:400\u001b[0m, in \u001b[0;36mBaseEstimator._check_n_features\u001b[1;34m(self, X, reset)\u001b[0m\n\u001b[0;32m    397\u001b[0m     \u001b[38;5;28;01mreturn\u001b[39;00m\n\u001b[0;32m    399\u001b[0m \u001b[38;5;28;01mif\u001b[39;00m n_features \u001b[38;5;241m!=\u001b[39m \u001b[38;5;28mself\u001b[39m\u001b[38;5;241m.\u001b[39mn_features_in_:\n\u001b[1;32m--> 400\u001b[0m     \u001b[38;5;28;01mraise\u001b[39;00m \u001b[38;5;167;01mValueError\u001b[39;00m(\n\u001b[0;32m    401\u001b[0m         \u001b[38;5;124mf\u001b[39m\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mX has \u001b[39m\u001b[38;5;132;01m{\u001b[39;00mn_features\u001b[38;5;132;01m}\u001b[39;00m\u001b[38;5;124m features, but \u001b[39m\u001b[38;5;132;01m{\u001b[39;00m\u001b[38;5;28mself\u001b[39m\u001b[38;5;241m.\u001b[39m\u001b[38;5;18m__class__\u001b[39m\u001b[38;5;241m.\u001b[39m\u001b[38;5;18m__name__\u001b[39m\u001b[38;5;132;01m}\u001b[39;00m\u001b[38;5;124m \u001b[39m\u001b[38;5;124m\"\u001b[39m\n\u001b[0;32m    402\u001b[0m         \u001b[38;5;124mf\u001b[39m\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mis expecting \u001b[39m\u001b[38;5;132;01m{\u001b[39;00m\u001b[38;5;28mself\u001b[39m\u001b[38;5;241m.\u001b[39mn_features_in_\u001b[38;5;132;01m}\u001b[39;00m\u001b[38;5;124m features as input.\u001b[39m\u001b[38;5;124m\"\u001b[39m\n\u001b[0;32m    403\u001b[0m     )\n",
+      "\u001b[1;31mValueError\u001b[0m: X has 1 features, but LinearRegression is expecting 6 features as input."
+     ]
+    }
+   ],
+   "source": [
+    "SSD = np.sum((Y - lm.predict(X_data))**2)\n",
+    "RSE = np.sqrt(SSD/(len(X_data)-1))\n",
+    "y_mean = np.mean(Y)\n",
+    "error = RSE/y_mean\n",
+    "SSD, RSE, y_mean, error*100"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9fd2841e",
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.7"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
